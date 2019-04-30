@@ -116,22 +116,22 @@ int copyfiles(int argc, char **argv){
          dstpath: directory to copy to
 */
 int cp1file(char *srcpath, char *dstpath){
-  int fdin, fdout, err, flag;
-  unsigned char buf[4096];
+  int fdin, fdout, rd, flag;
+  unsigned char buf[2048];
   char *outpath = buildpath(srcpath, dstpath);
 
   fdin = open(srcpath, O_RDONLY);
   fdout = open(outpath, O_CREAT | O_WRONLY);
-  err = read(fdin, buf, 4096);
-  flag = err;
-  err = write(fdout, buf, flag);
-  if(err == -1){
-    fprintf(stderr, "Error writing");
-    free((void *) buf);
+
+  while((rd = read(fdin, buf, 2048)) > 0){
+    if(write(fdout, buf, rd) != rd){
+      close(fdin);
+      close(fdout);
+      return -1;
+    }
   }
   close(fdin);
   close(fdout);
-
   return 1;
 }
 
